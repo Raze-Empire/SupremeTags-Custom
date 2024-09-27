@@ -2,18 +2,21 @@ package net.noscape.project.supremetags.handlers.menu;
 
 import de.tr7zw.nbtapi.NBTItem;
 import me.arcaniax.hdb.api.HeadDatabaseAPI;
-import net.noscape.project.supremetags.*;
+import net.noscape.project.supremetags.SupremeTags;
 import net.noscape.project.supremetags.handlers.Tag;
-import net.noscape.project.supremetags.storage.*;
+import net.noscape.project.supremetags.storage.UserData;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static net.noscape.project.supremetags.utils.Utils.*;
@@ -176,9 +179,6 @@ public abstract class Paged extends Menu {
                     displayname = replacePlaceholders(menuUtil.getOwner(), displayname);
                 }
 
-                displayname = displayname.replaceAll("\\$", "\\\\\\$");
-                permission = permission.replaceAll("\\$", "\\\\\\$");
-
                 String material;
 
                 if (SupremeTags.getInstance().getTagManager().getTagConfig().getString("tags." + t.getIdentifier() + ".display-item") != null) {
@@ -333,20 +333,21 @@ public abstract class Paged extends Menu {
                         tagMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                         tagMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
 
-                        List<String> lore;
+                        List<String> unformattedLore;
+
 
                         if (SupremeTags.getInstance().getConfig().getBoolean("settings.locked-view") && !SupremeTags.getInstance().getConfig().getBoolean("settings.cost-system") && !menuUtil.getOwner().hasPermission(permission)) {
-                            lore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.locked-permission");
+                            unformattedLore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.locked-permission");
                         } else if (SupremeTags.getInstance().getConfig().getBoolean("settings.cost-system") && !SupremeTags.getInstance().getConfig().getBoolean("settings.locked-view") && !menuUtil.getOwner().hasPermission(permission)) {
-                            lore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.locked-lore");
+                            unformattedLore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.locked-lore");
                         } else if (SupremeTags.getInstance().getConfig().getBoolean("settings.cost-system") && !SupremeTags.getInstance().getConfig().getBoolean("settings.locked-view") && menuUtil.getOwner().hasPermission(permission)) {
-                            lore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.unlocked-lore");
+                            unformattedLore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.unlocked-lore");
                         } else if (SupremeTags.getInstance().getConfig().getBoolean("settings.cost-system") && !menuUtil.getOwner().hasPermission(permission)) {
-                            lore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.locked-lore");
+                            unformattedLore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.locked-lore");
                         } else if(menuUtil.getOwner().hasPermission(permission)) {
-                            lore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.unlocked-lore");
+                            unformattedLore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.unlocked-lore");
                         } else {
-                            lore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.unlocked-lore");
+                            unformattedLore = SupremeTags.getInstance().getConfig().getStringList("gui.tag-menu-none-categories.tag-item.unlocked-lore");
                         }
 
                         String descriptionPlaceholder = "%description%";
@@ -354,15 +355,30 @@ public abstract class Paged extends Menu {
                         String tagPlaceholder = "%tag%";
                         String costPlaceholder = "%cost%";
 
-                        for (int l = 0; l < lore.size(); l++) {
-                            String line = lore.get(l);
+                        String[] descriptionLines = t.getDescription().split("\r\n|\r|\n");
+
+                        List<String> lore = new ArrayList<>();
+
+                        for (int l = 0; l < unformattedLore.size(); l++) {
+                            boolean descriptionStart = false;
+
+                            String line = unformattedLore.get(l);
                             line = ChatColor.translateAlternateColorCodes('&', line);
-                            line = line.replaceAll(descriptionPlaceholder, format(t.getDescription()));
+                            if(line.contains(descriptionPlaceholder)) {
+                                descriptionStart = true;
+                            }
+                            line = line.replaceAll(descriptionPlaceholder, format(descriptionLines[0]));
                             line = line.replaceAll(identifierPlaceholder, t.getIdentifier());
                             line = line.replaceAll(tagPlaceholder, t.getTag());
                             line = line.replaceAll(costPlaceholder, String.valueOf(t.getCost()));
                             line = replacePlaceholders(menuUtil.getOwner(), line);
-                            lore.set(l, line);
+                            lore.add(line);
+
+                            if(descriptionStart) {
+                                for (int dl = 1; dl < descriptionLines.length; dl++) {
+                                    lore.add(format("&f" + descriptionLines[dl]));
+                                }
+                            }
                         }
 
                         tagMeta.setLore(color(lore));
