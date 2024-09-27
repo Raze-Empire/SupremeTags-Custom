@@ -29,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -87,6 +88,13 @@ public final class SupremeTags extends JavaPlugin {
 
         if (isMySQL()) {
             mysql.disconnect();
+        }
+        if(isH2()) {
+            try {
+                h2.getConnection().close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
