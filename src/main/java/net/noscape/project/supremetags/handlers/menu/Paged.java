@@ -154,7 +154,7 @@ public abstract class Paged extends Menu {
 
                 String displayname;
 
-                if (SupremeTags.getInstance().getConfig().getString("tags." + t.getIdentifier() + ".displayname") != null) {
+                if (SupremeTags.getInstance().getTagManager().getTagConfig().getString("tags." + t.getIdentifier() + ".displayname") != null) {
                     displayname = Objects.requireNonNull(SupremeTags.getInstance().getTagManager().getTagConfig().getString("tags." + t.getIdentifier() + ".displayname")).replace("%tag%", t.getTag());
                 } else {
                     displayname = format("&7Tag: " + t.getTag());
