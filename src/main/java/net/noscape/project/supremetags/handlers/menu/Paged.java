@@ -27,6 +27,7 @@ public abstract class Paged extends Menu {
     private final int tagsCount;
 
     private int currentItemsOnPage = 0;
+    private boolean isLast = true;
 
     public Paged(MenuUtil menuUtil) {
         super(menuUtil);
@@ -49,7 +50,7 @@ public abstract class Paged extends Menu {
 
         inventory.setItem(49, makeItem(Material.valueOf(Objects.requireNonNull(SupremeTags.getInstance().getConfig().getString("gui.layout.close-menu-material")).toUpperCase()), close));
 
-        if (getCurrentItemsOnPage() == 36 && tagsCount > 36) {
+        if (!isLast) {
             inventory.setItem(50, makeItem(Material.valueOf(Objects.requireNonNull(SupremeTags.getInstance().getConfig().getString("gui.layout.back-next-material")).toUpperCase()), next));
         }
 
@@ -74,7 +75,7 @@ public abstract class Paged extends Menu {
             inventory.setItem(49, makeItem(Material.valueOf(Objects.requireNonNull(SupremeTags.getInstance().getConfig().getString("gui.layout.close-menu-material")).toUpperCase()), close));
         }
 
-        if (getCurrentItemsOnPage() == 36 && SupremeTags.getInstance().getConfig().getBoolean("gui.items.next-item")) {
+        if (!isLast && SupremeTags.getInstance().getConfig().getBoolean("gui.items.next-item")) {
             inventory.setItem(50, makeItem(Material.valueOf(Objects.requireNonNull(SupremeTags.getInstance().getConfig().getString("gui.layout.back-next-material")).toUpperCase()), next));
         }
 
@@ -145,14 +146,23 @@ public abstract class Paged extends Menu {
             });
 
             currentItemsOnPage = 0;
+            isLast = true;
 
-            for (int i = startIndex; i < endIndex; i++) {
+            for (int i = startIndex; i <= endIndex; i++) {
+                if(i > tag.size() - 1) {
+                    break;
+                }
                 Tag t = tag.get(i);
-                if (t == null) continue;
+                if (t == null) break;
 
                 String permission = SupremeTags.getInstance().getTagManager().getTagConfig().getString("tags." + t.getIdentifier() + ".permission");
 
                 if (permission != null && !SupremeTags.getInstance().getConfig().getBoolean("settings.locked-view") && !SupremeTags.getInstance().getConfig().getBoolean("settings.cost-system")  && !menuUtil.getOwner().hasPermission(permission)) continue;
+
+                if(i == endIndex) {
+                    isLast = false;
+                    continue;
+                }
 
                 String displayname;
 
@@ -768,10 +778,19 @@ public abstract class Paged extends Menu {
             });
 
             currentItemsOnPage = 0;
+            isLast = true;
 
-            for (int i = startIndex; i < endIndex; i++) {
+            for (int i = startIndex; i <= endIndex; i++) {
+                if(i > tag.size() - 1) {
+                    break;
+                }
                 Tag t = tag.get(i);
-                if (t == null) continue;
+                if (t == null) break;
+
+                if(i == endIndex) {
+                    isLast = false;
+                    continue;
+                }
 
                 String permission = SupremeTags.getInstance().getTagManager().getTagConfig().getString("tags." + t.getIdentifier() + ".permission");
 
@@ -1377,10 +1396,19 @@ public abstract class Paged extends Menu {
             });
 
             currentItemsOnPage = 0;
+            isLast = true;
 
-            for (int i = startIndex; i < endIndex; i++) {
+            for (int i = startIndex; i <= endIndex; i++) {
+                if(i > tag.size() - 1) {
+                    break;
+                }
                 Tag t = tag.get(i);
-                if (t == null) continue;
+                if (t == null) break;
+
+                if(i == endIndex) {
+                    isLast = false;
+                    continue;
+                }
 
                 String permission = SupremeTags.getInstance().getTagManager().getTagConfig().getString("tags." + t.getIdentifier() + ".permission");
 
