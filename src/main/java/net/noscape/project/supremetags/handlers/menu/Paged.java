@@ -376,6 +376,10 @@ public abstract class Paged extends Menu {
 
                             if(descriptionStart) {
                                 for (int dl = 1; dl < descriptionLines.length; dl++) {
+                                    descriptionLines[dl] = descriptionLines[dl].replaceAll(identifierPlaceholder, t.getIdentifier());
+                                    descriptionLines[dl] = descriptionLines[dl].replaceAll(tagPlaceholder, t.getTag());
+                                    descriptionLines[dl] = descriptionLines[dl].replaceAll(costPlaceholder, String.valueOf(t.getCost()));
+                                    descriptionLines[dl] = replacePlaceholders(menuUtil.getOwner(), descriptionLines[dl]);
                                     lore.add(format("&f" + descriptionLines[dl]));
                                 }
                             }
