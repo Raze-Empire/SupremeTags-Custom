@@ -46,6 +46,7 @@ public class EditorListener implements Listener {
             e.setCancelled(true);
 
             Tag tag = SupremeTags.getInstance().getTagManager().getTag(editor.getIdentifier());
+            message = message.replace("\\n", "\n");
             tag.setDescription(message);
             SupremeTags.getInstance().getTagManager().saveTag(tag);
 
