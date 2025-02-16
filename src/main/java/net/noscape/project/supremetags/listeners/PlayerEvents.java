@@ -1,5 +1,9 @@
 package net.noscape.project.supremetags.listeners;
 
+import io.papermc.paper.chat.ChatRenderer;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.noscape.project.supremetags.*;
 import net.noscape.project.supremetags.checkers.UpdateChecker;
 import net.noscape.project.supremetags.handlers.*;
@@ -10,6 +14,7 @@ import org.bukkit.event.player.*;
 
 import java.util.*;
 
+import static net.kyori.adventure.translation.GlobalTranslator.renderer;
 import static net.noscape.project.supremetags.utils.Utils.*;
 
 public class PlayerEvents implements Listener {
@@ -58,10 +63,12 @@ public class PlayerEvents implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onChat(AsyncPlayerChatEvent e) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onChat(AsyncChatEvent e) {
         Player player = e.getPlayer();
-        String format = e.getFormat();
+        ChatRenderer renderer = e.renderer();
+
+        String tagFormat;
 
         if (!UserData.getActive(player.getUniqueId()).equalsIgnoreCase("None") && tags.containsKey(UserData.getActive(player.getUniqueId()))) {
             Tag tag = SupremeTags.getInstance().getTagManager().getTag(UserData.getActive(player.getUniqueId()));
@@ -73,22 +80,27 @@ public class PlayerEvents implements Listener {
 
         // Store the value of UserData.getActive(player.getUniqueId()) in a local variable
         String activeTag = UserData.getActive(player.getUniqueId());
-        String replace = format.replace("{tag}", "").replace("{supremetags_tag}", "").replace("{TAG}", "");
         if (activeTag == null || activeTag.equalsIgnoreCase("None")) {
-            e.setFormat(replace);
+            tagFormat = "";
         } else {
             // Store the value of SupremeTags.getInstance().getTagManager().getTags().get(activeTag) in a local variable
             Tag tag = SupremeTags.getInstance().getTagManager().getTags().get(activeTag);
             if (tag == null) {
-                e.setFormat(replace);
+                tagFormat = "";
             } else {
                 // Store the value of format(tag.getTag()) in a local variable
-                String formattedTag = format(tag.getTag());
+                String formattedTag = format(tag.getTag().replace("$", "$")); // Escaping $
                 formattedTag = replacePlaceholders(player, formattedTag);
 
-                e.setFormat(format.replace("{tag}", formattedTag).replace("{supremetags_tag}", formattedTag).replace("{TAG}", formattedTag));
+                tagFormat = formattedTag;
             }
         }
+
+        e.renderer((source, displayname, message, viewer) -> {
+            Component component = renderer.render(source, displayname, message, viewer);
+
+            return component.replaceText(TextReplacementConfig.builder().match("\\{(?:TAG|tag|supremetags_tag)\\}").replacement(tagFormat).build());
+        });
     }
 
     public Map<String, Tag> getTags() {
