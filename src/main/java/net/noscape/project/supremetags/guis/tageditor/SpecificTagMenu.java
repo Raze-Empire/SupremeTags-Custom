@@ -87,7 +87,10 @@ public class SpecificTagMenu extends Menu {
                 lore.add("&7Category: &6" + t.getCategory());
                 lore.add("&7Cost: &6" + t.getCost());
                 lore.add("&7Description:");
-                lore.add("&6" + t.getDescription());
+                String[] descriptionLines = t.getDescription().split("\r\n|\r|\n");
+                for (String line : descriptionLines) {
+                    lore.add("&6" + line);
+                }
 
                 String displayname;
 
@@ -104,7 +107,10 @@ public class SpecificTagMenu extends Menu {
                 getInventory().setItem(20, makeItem(Material.NAME_TAG, format("&e&lChange Tag"), c_tag));
 
                 List<String> c_desc = new ArrayList<>();
-                c_desc.add("&7Current: &6" + t.getDescription());
+                c_desc.add("&7Current: &6" + descriptionLines[0]);
+                for (int i = 1; i < descriptionLines.length; i++) {
+                    c_desc.add("&6" + descriptionLines[i]);
+                }
                 getInventory().setItem(29, makeItem(Material.OAK_SIGN, format("&e&lChange Description"), c_desc));
 
                 List<String> c_cat = new ArrayList<>();
