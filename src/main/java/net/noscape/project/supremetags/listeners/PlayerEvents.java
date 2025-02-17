@@ -3,7 +3,9 @@ package net.noscape.project.supremetags.listeners;
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.noscape.project.supremetags.*;
 import net.noscape.project.supremetags.checkers.UpdateChecker;
 import net.noscape.project.supremetags.handlers.*;
@@ -98,8 +100,9 @@ public class PlayerEvents implements Listener {
 
         e.renderer((source, displayname, message, viewer) -> {
             Component component = renderer.render(source, displayname, message, viewer);
+            TextComponent tagComponent = LegacyComponentSerializer.legacySection().deserialize(tagFormat);
 
-            return component.replaceText(TextReplacementConfig.builder().match("\\{(?:TAG|tag|supremetags_tag)\\}").replacement(tagFormat).build());
+            return component.replaceText(TextReplacementConfig.builder().match("\\{(?:TAG|tag|supremetags_tag)\\}").replacement(tagComponent).build());
         });
     }
 
