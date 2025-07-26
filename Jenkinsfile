@@ -29,7 +29,7 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
-            node {
+            script {
                 cleanWs()
             }
         }
