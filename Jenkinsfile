@@ -29,9 +29,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
-            script {
-                cleanWs()
-            }
         }
         success {
             echo 'Build completed successfully!'
