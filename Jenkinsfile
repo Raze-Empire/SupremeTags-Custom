@@ -1,7 +1,11 @@
 pipeline {
-    agent {
-        dockerContainer { image 'maven:3.9.11-amazoncorretto-21' }
+    agent any
+    
+    tools {
+        maven '3.9'
+        jdk '21'
     }
+
     
     stages {
         stage('Checkout') {
@@ -10,10 +14,9 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Build') {
             steps {
-                echo 'Building project with Maven...'
                 sh 'mvn clean package'
             }
         }
